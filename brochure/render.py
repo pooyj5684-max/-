@@ -3,6 +3,7 @@ Work area 299x212mm (1mm bleed), trim 297x210mm, safe area 10mm inside trim.
 Output is image-only (text effectively outlined, effects rasterized, no fonts in PDF)."""
 import sys, asyncio
 from PIL import Image
+from pypdf import PdfReader, PdfWriter
 from playwright.async_api import async_playwright
 
 SRC, OUT = sys.argv[1], sys.argv[2]
@@ -34,7 +35,12 @@ async def main():
             await sheets.nth(i).screenshot(path=png)
             im = Image.open(png).convert('RGB')
             dpi = im.width / (299 / 25.4)
-            im.save(f'{OUT}/BGF_FamilyDay_{n}.pdf', resolution=dpi, quality=100)
+            pdf = f'{OUT}/BGF_FamilyDay_{n}.pdf'
+            im.save(pdf, resolution=dpi, quality=100)
+            # pixel rounding leaves the page ~0.02mm off; snap to the guide's exact 847.559 x 600.945pt
+            r = PdfReader(pdf); w = PdfWriter()
+            pgx = r.pages[0]; pgx.scale_to(847.559, 600.945); w.add_page(pgx)
+            with open(pdf, 'wb') as f: w.write(f)
             print(n, im.size, round(dpi))
         await b.close()
 asyncio.run(main())
