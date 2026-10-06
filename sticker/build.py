@@ -1,7 +1,5 @@
 import sys, numpy as np
 from PIL import Image, ImageDraw
-from reportlab.pdfgen import canvas
-from reportlab.lib.units import mm
 S, OUT = sys.argv[1], sys.argv[2]
 bg = Image.open(f'{S}/img/x-000.jpg').convert('RGB')
 bear = Image.open(f'{S}/img/x-001.jpg').convert('RGB')
@@ -34,9 +32,8 @@ outside = Image.new('L', (N, N), 255); ImageDraw.Draw(outside).ellipse((0, 0, N-
 canvas_img.paste((255,255,255), (0,0), outside)
 canvas_img.save(f'{OUT}/BGF_dagwa_sticker_80x80.png', dpi=(DPI, DPI))
 canvas_img.save(f'{S}/print.png')
-W = 238.11
-c = canvas.Canvas(f'{OUT}/BGF_dagwa_sticker_80x80.pdf', pagesize=(W, W))
-c.setTitle('BGF 다과용 동글 스티커 80x80'); c.drawImage(f'{S}/print.png', 0, 0, W, W); c.showPage(); c.save()
+# image-only PDF: no font resources, so upload checker sees no un-outlined text
+canvas_img.save(f'{OUT}/BGF_sticker_80x80_outline.pdf', resolution=DPI, quality=100)
 # check preview with template guides (NOT for printing)
 pv = canvas_img.copy(); d = ImageDraw.Draw(pv); h = N/2
 for rad, col in ((42,(0,174,239)),(40,(120,120,120)),(37,(237,28,36))):
